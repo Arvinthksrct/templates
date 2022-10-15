@@ -14,6 +14,10 @@ info:
 requests:
   - raw:
       - |
+        GET /front/logout.php HTTP/1.1
+        Host: {{Hostname}}
+
+      - |
         GET / HTTP/1.1
         Host: {{Hostname}}
 
@@ -24,14 +28,20 @@ requests:
         Content-Type: application/x-www-form-urlencoded
         Referer: {{BaseURL}}
 
-        {{name}}={{user}}&{{password}}={{pass}}&auth=local&submit=Submit&_glpi_csrf_token={{token}}
+        noAUTO=1&{{name}}={{user}}&{{password}}={{pass}}&auth=local&submit=Submit&_glpi_csrf_token={{token}}
 
     attack: pitchfork
     payloads:
       user:
         - glpi
+        - post-only
+        - normal
+        - tech
       pass:
         - glpi
+        - postonly
+        - normal
+        - tech
 
     extractors:
       - type: regex
@@ -61,12 +71,14 @@ requests:
     cookie-reuse: true
     matchers-condition: and
     matchers:
-      - type: word
-        words:
-          - '<title>GLPI - Standard Interface</title>'
-
       - type: status
         status:
-          - 200
+          - 302
+
+      - type: word
+        words:
+          - "Location: /front/central.php"
+        condition: or
+        part: header
 
 # Enhanced by mp on 2022/03/03
